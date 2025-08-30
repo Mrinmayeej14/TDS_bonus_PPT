@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="description" content="BatAI Deck — PPTX Generator (Velaris theme)" />
+  <meta name="theme-color" content="#101936" />
+  <title>BatAI Deck — Velaris</title>
+
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400..900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+  <!-- Bootstrap (utilities/layout) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    /* ======================= Velaris Theme (ACOTAR-inspired) ======================= */
+    :root {
+      /* Night (default) */
+      --vel-bg: #0b0f1f;
+      --vel-bg2: #101936;
+      --vel-surface: rgba(255,255,255,0.07);
+      --vel-border: rgba(167,139,250,0.35);
+      --vel-text: #eaf2ff;
+      --vel-muted: #98a4c0;
+
+      --vel-amethyst: #a78bfa;
+      --vel-teal: #22d3ee;
+      --vel-mint: #5ef6c5;
+      --vel-gold: #f6c453;
+
+      --card-radius: 16px;
+
+      --shadow-strong: 0 20px 60px rgba(16,25,54,0.45);
+      --shadow-soft: 0 10px 30px rgba(34,211,238,0.20);
+      --ring: 0 0 0 3px rgba(167,139,250,0.35);
+    }
+
+    /* Dusk variant */
+    [data-theme="dusk"] {
+      --vel-bg: #0f1430;
+      --vel-bg2: #121a3b;
+      --vel-surface: rgba(255,255,255,0.06);
+      --vel-border: rgba(167,139,250,0.30);
+      --vel-text: #eaf2ff;
+      --vel-muted: #a3afcc;
+
+      --vel-amethyst: #b7a5ff;
+      --vel-teal: #37e2f3;
+      --vel-mint: #7af8d3;
+      --vel-gold: #ffd37a;
+    }
+
+    /* Light/Dawn variant */
+    [data-theme="light"] {
+      --vel-bg: #eef3ff;
+      --vel-bg2: #e7efff;
+      --vel-surface: rgba(8,16,25,0.04);
+      --vel-border: rgba(34,51,102,0.18);
+      --vel-text: #0f1422;
+      --vel-muted: #4a5672;
+
+      --vel-amethyst: #7c5aed;
+      --vel-teal: #16bcd4;
+      --vel-mint: #22e2a7;
+      --vel-gold: #d8a12b;
+
+      --shadow-strong: 0 20px 60px rgba(8,16,25,0.08);
+      --shadow-soft: 0 10px 30px rgba(23,45,85,0.12);
+      --ring: 0 0 0 3px rgba(23,45,85,0.16);
+    }
+
+    /* Base */
+    html, body { height: 100%; margin: 0; }
+    body {
+      font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+      color: var(--vel-text);
+      background:
+        radial-gradient(1200px 700px at 20% -10%, rgba(167,139,250,0.18), transparent 60%),
+        radial-gradient(900px 600px at 90% 10%, rgba(34,211,238,0.12), transparent 60%),
+        linear-gradient(180deg, var(--vel-bg2), var(--vel-bg));
+      overflow-x: hidden;
+    }
+
+    /* Starfield canvas behind everything */
+    #stars {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      filter: drop-shadow(0 0 2px rgba(167,139,250,0.4));
+    }
+
+    /* Top hero bar (glass) */
+    .top-nav {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 18px; position: sticky; top: 0; z-index: 60;
+      border-bottom: 1px solid var(--vel-border);
+      backdrop-filter: blur(12px) saturate(140%);
+      background: linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.02));
+      box-shadow: 0 10px 30px rgba(8,16,25,0.25);
+    }
+    .nav-brand {
+      display: flex; gap: 12px; align-items: center; font-weight: 800;
+      letter-spacing: .3px;
+    }
+    .nav-brand .brand-text {
+      font-family: Cinzel, Georgia, 'Times New Roman', serif;
+      background: linear-gradient(90deg, var(--vel-amethyst), var(--vel-teal));
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+      text-shadow: 0 0 20px rgba(167,139,250,0.25);
+      font-size: 1.05rem;
+    }
+    .nav-brand small { font-weight: 600; color: var(--vel-muted); letter-spacing: .2px; }
+    .nav-brand .version {
+      font-size: .75rem; padding: .2rem .5rem; border-radius: 999px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.06));
+      border: 1px solid var(--vel-border); color: var(--vel-muted);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.35);
+    }
+
+    .nav-controls { display: flex; gap: 8px; align-items: center }
+    .nav-btn {
+      background: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.04));
+      color: var(--vel-text); border: 1px solid var(--vel-border);
+      padding: 8px 11px; border-radius: 12px; cursor: pointer;
+      box-shadow: var(--shadow-soft);
+      transition: transform .15s ease, box-shadow .2s ease, background .2s ease;
+    }
+    .nav-btn:hover { transform: translateY(-1px); box-shadow: 0 12px 34px rgba(167,139,250,0.22) }
+    .nav-btn:focus-visible { outline: none; box-shadow: var(--ring); }
+
+    /* Command Deck layout */
+    .deck-wrap { max-width: 1200px; margin: 18px auto; padding: 0 12px; position: relative; z-index: 1 }
+    .deck-grid { display: grid; grid-template-columns: 1fr 360px; gap: 14px; }
+    @media (max-width:980px){ .deck-grid { grid-template-columns: 1fr } }
+
+    /* Cards / surfaces */
+    .card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.05));
+      border: 1px solid var(--vel-border);
+      border-radius: 12px; padding: 12px; color: var(--vel-text);
+      box-shadow: var(--shadow-strong);
+      backdrop-filter: blur(14px) saturate(140%);
+      transition: transform .15s ease, box-shadow .2s ease;
+    }
+    .card:hover { transform: translateY(-1px) }
+    .muted { color: var(--vel-muted) }
+
+    /* Inputs */
+    textarea, input, select {
+      background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+      color: var(--vel-text); border: 1px solid var(--vel-border); padding: 10px; border-radius: 12px; width: 100%;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+      transition: box-shadow .15s ease, border-color .2s ease;
+      caret-color: var(--vel-amethyst);
+    }
+    textarea { min-height: 220px; resize: vertical }
+    textarea:focus, input:focus, select:focus { outline: none; box-shadow: var(--ring) }
+
+    /* Buttons */
+    .btn-primary {
+      background: linear-gradient(135deg, var(--vel-amethyst), var(--vel-teal));
+      border: none; color: #081019; font-weight: 800; letter-spacing: .3px;
+      box-shadow: 0 12px 36px rgba(34,211,238,0.24), inset 0 1px 0 rgba(255,255,255,0.45);
+      border-radius: 12px;
+    }
+    .btn-primary:focus-visible { box-shadow: var(--ring), 0 12px 36px rgba(34,211,238,0.24) }
+    .btn-ghost {
+      background: transparent; border: 1px solid var(--vel-border); color: var(--vel-text);
+      border-radius: 12px; box-shadow: var(--shadow-soft);
+    }
+    .btn-ghost:hover { background: linear-gradient(135deg, rgba(167,139,250,0.10), rgba(34,211,238,0.08)); }
+
+    /* Section headings */
+    .composer-card h4,
+    .actions-card h4,
+    .history-strip h4 { margin-top: 0; font-family: Cinzel, Georgia, serif; letter-spacing: .3px }
+
+    /* Template sub-box */
+    .template-box {
+      margin-top: 10px; padding: 10px; border-radius: 12px;
+      border: 1px dashed rgba(167,139,250,0.45);
+      background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+    }
+
+    /* Actions & Preview (right column) */
+    .actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    .preview { margin-top: 12px }
+
+    /* Bottom History Strip */
+    .history-strip {
+      margin-top: 16px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.05));
+      border: 1px solid var(--vel-border);
+      border-radius: 12px; padding: 10px; color: var(--vel-text);
+      box-shadow: var(--shadow-strong);
+      backdrop-filter: blur(14px) saturate(140%);
+    }
+    .history-header { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 8px }
+    .history-scroll { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 4px; }
+    .history-scroll .card { flex: 0 0 auto; min-width: 260px; padding: 8px; }
+
+    /* Sticky Action Bar (mobile) */
+    @media (max-width:768px) {
+      .action-bar {
+        position: sticky; bottom: 10px; z-index: 55;
+        display: flex; gap: 8px; justify-content: space-between; align-items: center;
+        padding: 8px;
+        background: linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.05));
+        border: 1px solid var(--vel-border); border-radius: 12px;
+        backdrop-filter: blur(14px) saturate(140%); box-shadow: var(--shadow-strong);
+      }
+    }
+
+    /* Floating utility dock (desktop) */
+    @media (min-width:769px) {
+      .floating-dock {
+        position: fixed; right: 18px; bottom: 78px; z-index: 50;
+        display: flex; gap: 8px; flex-direction: column;
+        background: linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.05));
+        border: 1px solid var(--vel-border); padding: 8px; border-radius: 12px;
+        backdrop-filter: blur(14px) saturate(140%); box-shadow: var(--shadow-strong)
+      }
+      .floating-dock button { width: 44px; height: 44px; border-radius: 10px }
+    }
+
+    /* Performance chip */
+    #perf {
+      position: fixed; left: 18px; bottom: 18px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.05));
+      border: 1px solid var(--vel-border); padding: 10px; border-radius: 12px; color: var(--vel-muted); z-index: 1400;
+      box-shadow: var(--shadow-soft)
+    }
+
+    /* Modals */
+    #settings, #providers {
+      display: none; position: fixed; inset: 0; place-items: center; z-index: 1500; backdrop-filter: blur(6px);
+      background: radial-gradient(800px 600px at 60% 40%, rgba(167,139,250,0.08), transparent 60%);
+    }
+    .modal-card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.05));
+      border: 1px solid var(--vel-border); padding: 16px; border-radius: 12px; max-width: 720px; margin: 40px auto;
+      color: var(--vel-text); box-shadow: var(--shadow-strong)
+    }
+
+    /* Headings aesthetic */
+    h1,h2,h3,h4 { font-family: Cinzel, Georgia, serif; letter-spacing: .3px }
+    .small-muted { font-size: .92rem; color: var(--vel-muted) }
+    [aria-live] { outline: none }
+  </style>
+</head>
+<body>
+  <canvas id="stars" aria-hidden="true"></canvas>
+
+  <!-- Top hero bar -->
+  <header class="top-nav" role="banner">
+    <div class="nav-brand">
+      <i class="fas fa-star"></i>
+      <div style="display:flex;flex-direction:column;line-height:1">
+        <span class="brand-text">BatAI Deck</span>
+        <small class="muted">City of Starlight Edition</small>
+      </div>
+      <span class="version">Velaris</span>
+    </div>
+
+    <div class="nav-controls">
+      <button id="provider-open" class="nav-btn" title="Provider & Model"><i class="fas fa-sliders-h"></i></button>
+      <button id="theme-toggle" class="nav-btn" title="Theme: Dark → Dusk → Light"><i class="fas fa-moon"></i></button>
+      <button id="settings-open" class="nav-btn" title="Settings"><i class="fas fa-cog"></i></button>
+    </div>
+  </header>
+
+  <main class="deck-wrap" role="main">
+    <div class="deck-grid">
+      <!-- Left: Composer -->
+      <section class="card composer-card" aria-label="Composer">
+        <h4>Compose</h4>
+        <label for="text">Your Text or Markdown</label>
+        <textarea id="text" placeholder="Paste or type your content here..."></textarea>
+
+        <div style="display:grid;grid-template-columns:1fr 160px;gap:10px;margin-top:10px">
+          <div>
+            <label for="guidance">One-line guidance (optional)</label>
+            <input id="guidance" type="text" placeholder="e.g., investor pitch, tech summary">
+          </div>
+          <div>
+            <label for="num_slides">Number of slides</label>
+            <input id="num_slides" type="number" min="1" max="40" value="10">
+            <div class="small-muted">1–40</div>
+          </div>
+        </div>
+
+        <div class="template-box" aria-label="Template options">
+          <div class="small-muted"><i class="fas fa-feather"></i> Optional template</div>
+          <label for="template" style="margin-top:8px">Template (.pptx/.potx)</label>
+          <input id="template" type="file" accept=".pptx,.potx">
+          <label style="margin-top:8px"><input id="reuse_images" type="checkbox"> Reuse images from template (safe placement)</label>
+        </div>
+      </section>
+
+      <!-- Right: Actions & Preview -->
+      <section class="card actions-card" aria-label="Actions & Preview">
+        <h4>Actions</h4>
+        <div class="actions">
+          <button id="generate" class="btn btn-primary" disabled><i class="fas fa-magic"></i> Generate .pptx</button>
+          <button id="btn_clear" class="btn btn-ghost">Clear</button>
+          <button id="download-last" class="btn btn-ghost" disabled title="Download last"><i class="fas fa-download"></i> Download last</button>
+          <button id="clear-form" class="btn btn-ghost" title="Clear form"><i class="fas fa-eraser"></i></button>
+        </div>
+        <div id="status" aria-live="polite" class="small-muted" style="margin-top:10px"></div>
+        <div id="output" class="preview"></div>
+
+        <!-- Mobile sticky action bar -->
+        <div class="action-bar" aria-hidden="true">
+          <button class="btn btn-primary" id="gen-mobile"><i class="fas fa-magic"></i></button>
+          <button class="btn btn-ghost" id="dl-mobile"><i class="fas fa-download"></i></button>
+          <button class="btn btn-ghost" id="clr-mobile"><i class="fas fa-eraser"></i></button>
+          <button class="btn btn-ghost" id="set-mobile"><i class="fas fa-cog"></i></button>
+        </div>
+      </section>
+    </div>
+
+    <!-- Bottom History Strip -->
+    <section class="history-strip" aria-label="History">
+      <div class="history-header">
+        <div style="display:flex;gap:8px;align-items:center">
+          <i class="fas fa-clock"></i>
+          <strong>History</strong>
+          <span class="small-muted">metadata only</span>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button id="export-history" class="btn btn-ghost" title="Export history"><i class="fas fa-download"></i></button>
+          <button id="clear-history" class="btn btn-ghost" title="Clear history"><i class="fas fa-trash"></i></button>
+        </div>
+      </div>
+      <div id="historyList" class="history-scroll" role="list"></div>
+    </section>
+  </main>
+
+  <!-- Floating utility dock (desktop quick actions) -->
+  <div class="floating-dock" aria-hidden="true">
+    <button class="nav-btn" title="Download last" id="dock-dl"><i class="fas fa-download"></i></button>
+    <button class="nav-btn" title="Clear form" id="dock-clear"><i class="fas fa-eraser"></i></button>
+    <button class="nav-btn" title="Settings" id="dock-settings"><i class="fas fa-cog"></i></button>
+  </div>
+
+  <!-- Settings dialog -->
+  <div id="settings">
+    <div class="modal-card">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <h3 style="margin:0">Settings</h3>
+        <button id="close_settings" class="nav-btn"><i class="fas fa-times"></i></button>
+      </div>
+      <div style="margin-top:10px">
+        <label>Max history items</label>
+        <input id="max_history" type="number" min="10" max="1000" value="200" style="width:120px">
+      </div>
+      <div style="margin-top:12px; text-align:right">
+        <button id="save_settings" class="btn btn-primary">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Providers dialog -->
+  <div id="providers">
+    <div class="modal-card">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <h3 style="margin:0">Provider & Model</h3>
+        <button id="close_providers" class="nav-btn"><i class="fas fa-times"></i></button>
+      </div>
+
+      <label for="provider" style="margin-top:8px">LLM Provider</label>
+      <select id="provider">
+        <option value="aipipe">AI Pipe (OpenRouter)</option>
+        <option value="openai">OpenAI</option>
+        <option value="gemini">Gemini (Google)</option>
+        <option value="anthropic">Anthropic (Claude)</option>
+      </select>
+
+      <label for="api_key" style="margin-top:8px">API Key / Token</label>
+      <div style="display:flex;gap:8px">
+        <input id="api_key" type="password" placeholder="Paste your key/token..." style="flex:1">
+        <button id="paste_key" class="nav-btn" title="Paste from clipboard"><i class="fas fa-clipboard"></i></button>
+      </div>
+
+      <label for="model" style="margin-top:8px">Model</label>
+      <select id="model"></select>
+      <div id="model_hint" class="small-muted" style="margin-top:6px">Select provider to view models</div>
+
+      <div class="small-muted" style="margin-top:10px">
+        Tip: Your key is never stored on the server. A short prefix is cached locally for convenience.
+      </div>
+    </div>
+  </div>
+
+  <!-- Performance & toasts -->
+  <div id="perf">
+    <div style="font-weight:700">Performance</div>
+    <div style="font-size:.9rem">Response: <span id="perf_time">0ms</span></div>
+    <div style="font-size:.9rem">API calls: <span id="perf_calls">0</span></div>
+  </div>
+
+  <div id="toasts" class="toast-wrap" aria-live="polite"></div>
+
+  <!-- Bootstrap -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    /* ========= BatAI UI — Velaris Theme (restructured) =========
+       - Compose & Actions remain main; Provider/Model moved to top button modal
+       - Rebrand to BatAI; migrate localStorage keys
+    ============================================================= */
+
+    (function(){
+      /* -------------------------- Element References -------------------------- */
+      const providerEl = document.getElementById('provider');
+      const modelEl = document.getElementById('model');
+      const modelHintEl = document.getElementById('model_hint');
+      const apiKeyEl = document.getElementById('api_key');
+      const pasteKeyBtn = document.getElementById('paste_key');
+
+      const textEl = document.getElementById('text');
+      const guidanceEl = document.getElementById('guidance');
+      const numSlidesEl = document.getElementById('num_slides');
+      const templateEl = document.getElementById('template');
+      const reuseImagesEl = document.getElementById('reuse_images');
+
+      const generateBtn = document.getElementById('generate');
+      const clearBtn = document.getElementById('btn_clear');
+      const clearFormBtn = document.getElementById('clear-form');
+      const statusEl = document.getElementById('status');
+      const outputEl = document.getElementById('output');
+      const downloadLastBtn = document.getElementById('download-last');
+
+      const historyListEl = document.getElementById('historyList');
+      const exportHistoryBtn = document.getElementById('export-history');
+      const clearHistoryBtn = document.getElementById('clear-history');
+      const maxHistoryEl = document.getElementById('max_history');
+
+      const toastsEl = document.getElementById('toasts');
+      const perfTimeEl = document.getElementById('perf_time');
+      const perfCallsEl = document.getElementById('perf_calls');
+
+      const settingsOpenBtn = document.getElementById('settings-open');
+      const settingsModal = document.getElementById('settings');
+      const closeSettingsBtn = document.getElementById('close_settings');
+      const saveSettingsBtn = document.getElementById('save_settings');
+
+      const providerOpenBtn = document.getElementById('provider-open');
+      const providersModal = document.getElementById('providers');
+      const closeProvidersBtn = document.getElementById('close_providers');
+
+      const themeToggle = document.getElementById('theme-toggle');
+      const starsCanvas = document.getElementById('stars');
+      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+      // Floating/Sticky proxies
+      const dockDl = document.getElementById('dock-dl');
+      const dockClear = document.getElementById('dock-clear');
+      const dockSettings = document.getElementById('dock-settings');
+      const genMobile = document.getElementById('gen-mobile');
+      const dlMobile = document.getElementById('dl-mobile');
+      const clrMobile = document.getElementById('clr-mobile');
+      const setMobile = document.getElementById('set-mobile');
+
+      /* ------------------------------- Constants ------------------------------ */
+      // Storage keys (rebrand + migration)
+      const OLD_HISTORY_KEY = 'gyaan_deck_history_v1';
+      const OLD_STATE_KEY = 'gyaan_deck_state_v1';
+      const HISTORY_KEY = 'batai_deck_history_v1';
+      const STATE_KEY = 'batai_deck_state_v1';
+
+      // Models (expanded lists)
+      const MODELS = {
+        openai: [
+          {id:'gpt-4o-mini', label:'gpt-4o-mini'},
+          {id:'gpt-4o', label:'gpt-4o'},
+          {id:'gpt-4.1-nano', label:'gpt-4.1-nano'},
+          {id:'gpt-4o-realtime-preview', label:'gpt-4o-realtime-preview'},
+          {id:'gpt-4.1', label:'gpt-4.1'}
+        ],
+        aipipe: [
+          {id:'gpt-4o-mini', label:'gpt-4o-mini'},
+          {id:'gpt-4o', label:'gpt-4o'},
+          {id:'gpt-4.1-nano', label:'gpt-4.1-nano'}
+        ],
+        gemini: [
+          {id:'gemini-1.5-flash', label:'gemini-1.5-flash'},
+          {id:'gemini-2.1', label:'gemini-2.1'},
+          {id:'gemini-2.5-flash', label:'gemini-2.5-flash'},
+          {id:'gemini-2.5-pro', label:'gemini-2.5-pro'}
+        ],
+        anthropic: [
+          {id:'claude-2.1', label:'claude-2.1'},
+          {id:'claude-3-5-sonnet', label:'claude-3-5-sonnet'},
+          {id:'claude-3-5-sonnet-latest', label:'claude-3-5-sonnet-latest'},
+          {id:'claude-3', label:'claude-3'}
+        ]
+      };
+
+      // Theme modes
+      const themeModes = ['dark','dusk','light'];
+
+      /* --------------------------------- State -------------------------------- */
+      let lastBlobUrl = null;
+      let apiCalls = 0;
+
+      /* ------------------------------- Utilities ------------------------------ */
+      function getTheme(){ return document.documentElement.dataset.theme || 'dark'; }
+      function setTheme(mode){
+        document.documentElement.dataset.theme = mode;
+        const meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) meta.setAttribute('content', mode==='light' ? '#eef3ff' : '#101936');
+        if (starfield) starfield.setMode(mode);
+      }
+
+      function toast(msg, kind='info') {
+        const el = document.createElement('div');
+        el.className = 'toast ' + (kind==='success' ? 'success' : kind==='error' ? 'error' : '');
+        el.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><div>${msg}</div><button aria-label="close" style="background:none;border:none;color:var(--vel-muted);cursor:pointer">&times;</button></div>`;
+        toastsEl.appendChild(el);
+        const closeBtn = el.querySelector('button');
+        closeBtn.onclick = ()=> el.remove();
+        setTimeout(()=> el.remove(), 4500);
+      }
+
+      // Escape utility (kept exactly as provided)
+      function escapeHtml(s='') {
+        return (''+s).replace(/[&<>"']/g, c => ({
+          '&':'&','<':'<','>':'>','"':'"',"'":'&#39;'
+        }[c]));
+      }
+
+      /* ------------------------------ Persistence ----------------------------- */
+      // Migration: move old localStorage keys to new (one-time)
+      (function migrateStorage(){
+        try{
+          if (!localStorage.getItem(HISTORY_KEY) && localStorage.getItem(OLD_HISTORY_KEY)){
+            localStorage.setItem(HISTORY_KEY, localStorage.getItem(OLD_HISTORY_KEY));
+            localStorage.removeItem(OLD_HISTORY_KEY);
+          }
+          if (!localStorage.getItem(STATE_KEY) && localStorage.getItem(OLD_STATE_KEY)){
+            localStorage.setItem(STATE_KEY, localStorage.getItem(OLD_STATE_KEY));
+            localStorage.removeItem(OLD_STATE_KEY);
+          }
+        }catch(e){}
+      })();
+
+      function readHistory() {
+        try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'); } catch(e){ return []; }
+      }
+      function writeHistory(arr) {
+        localStorage.setItem(HISTORY_KEY, JSON.stringify(arr.slice(0, Number(maxHistoryEl.value||200))));
+      }
+      function addHistory(meta) {
+        const arr = readHistory(); arr.unshift(meta); writeHistory(arr); renderHistory();
+      }
+
+      function loadState() {
+        try {
+          const s = JSON.parse(localStorage.getItem(STATE_KEY) || '{}');
+          if (s.apiKeyPrefix) apiKeyEl.value = s.apiKeyPrefix; // put prefix in modal input for convenience
+          if (s.maxHistory) maxHistoryEl.value = s.maxHistory;
+        } catch {}
+      }
+      function saveState() {
+        try {
+          const s = { apiKeyPrefix: apiKeyEl.value ? apiKeyEl.value.slice(0,32) : '', maxHistory: Number(maxHistoryEl.value||200) };
+          localStorage.setItem(STATE_KEY, JSON.stringify(s));
+        } catch {}
+      }
+      window.addEventListener('beforeunload', saveState);
+
+      /* ------------------------------- Rendering ------------------------------ */
+      function renderHistory() {
+        const arr = readHistory();
+        historyListEl.innerHTML = '';
+        if (!arr.length) {
+          historyListEl.innerHTML = '<div class="small-muted">No generations yet</div>'; return;
+        }
+        for (const h of arr) {
+          const el = document.createElement('div');
+          el.className = 'card';
+          el.style.display = 'flex'; el.style.justifyContent = 'space-between'; el.style.alignItems = 'center';
+          el.style.padding = '8px'; el.style.gap = '8px';
+          el.innerHTML = `<div><strong>${escapeHtml(h.title||'Deck')}</strong><div class="small-muted">${new Date(h.ts).toLocaleString()} • ${h.model || ''} • ${h.slides} slides</div></div>
+                          <div style="display:flex;gap:8px">
+                            <button class="btn btn-ghost btn-sm" data-id="${h.ts}" data-act="recreate"><i class="fas fa-repeat"></i></button>
+                            <button class="btn btn-ghost btn-sm" data-id="${h.ts}" data-act="download"><i class="fas fa-download"></i></button>
+                          </div>`;
+          historyListEl.appendChild(el);
+
+          el.querySelector('[data-act="recreate"]').onclick = () => {
+            genLoadMeta(h);
+            toast('Parameters loaded. Press Generate to re-create.', 'success');
+          };
+          el.querySelector('[data-act="download"]').onclick = () => {
+            genLoadMeta(h);
+            generate(); // re-generate and auto-enable download
+            toast('Recreating deck for download...', 'info');
+          };
+        }
+      }
+
+      function renderOutput(meta) {
+        outputEl.innerHTML = '';
+        const box = document.createElement('div');
+        box.className = 'card';
+        box.style.display = 'flex'; box.style.justifyContent = 'space-between'; box.style.alignItems = 'center';
+        box.style.padding = '10px';
+        box.innerHTML = `<div><strong>${escapeHtml(meta.title)}</strong><div class="small-muted">${new Date(meta.ts).toLocaleString()} • ${meta.slides} slides • ${meta.model}</div></div>
+                         <div style="display:flex;gap:8px"><button id="dl-now" class="btn btn-primary small"><i class="fas fa-download"></i> Download</button></div>`;
+        outputEl.appendChild(box);
+        document.getElementById('dl-now').onclick = () => {
+          if (!lastBlobUrl) { toast('No generated file available', 'error'); return; }
+          const a = document.createElement('a'); a.href = lastBlobUrl; a.download = 'generated.pptx'; a.click();
+        };
+      }
+
+      /* ------------------------------- Validation ----------------------------- */
+      function validate() {
+        const ok = (textEl.value || '').trim().length > 10 &&
+                   (apiKeyEl.value || '').trim().length > 6 &&
+                   (numSlidesEl.value && Number(numSlidesEl.value)>=1 && Number(numSlidesEl.value)<=40);
+        generateBtn.disabled = !ok;
+        return ok;
+      }
+
+      /* ---------------------------- Provider / Models -------------------------- */
+      function applyModels() {
+        const p = providerEl.value;
+        modelEl.innerHTML = '';
+        (MODELS[p] || []).forEach(m => {
+          const opt = document.createElement('option');
+          opt.value = m.id; opt.textContent = m.label;
+          modelEl.appendChild(opt);
+        });
+        modelHintEl.textContent = p === 'openai' ? 'OpenAI models'
+                              : p === 'aipipe' ? 'AI Pipe (OpenRouter) models'
+                              : p === 'anthropic' ? 'Anthropic models'
+                              : 'Gemini models';
+      }
+
+      /* --------------------------------- Actions ------------------------------ */
+      function setBusy(b) {
+        generateBtn.disabled = b;
+        generateBtn.innerHTML = b ? '<i class="fas fa-circle-notch fa-spin"></i> Generating...' : '<i class="fas fa-magic"></i> Generate .pptx';
+      }
+
+      async function generate() {
+        if (!validate()) { toast('Please complete required fields', 'error'); return; }
+        setBusy(true);
+        statusEl.textContent = 'Generating…';
+        const start = performance.now(); apiCalls++; perfCallsEl.textContent = apiCalls;
+
+        try {
+          const fd = new FormData();
+          fd.append('text', (textEl.value||'').trim());
+          fd.append('guidance', (guidanceEl.value||'').trim());
+          fd.append('provider', providerEl.value);
+          fd.append('api_key', apiKeyEl.value);
+          fd.append('model', modelEl.value);
+          fd.append('num_slides', numSlidesEl.value);
+          fd.append('reuse_images', reuseImagesEl.checked ? 'true' : 'false');
+          if (templateEl.files && templateEl.files[0]) fd.append('template', templateEl.files[0]);
+
+          const resp = await fetch('/generate', { method:'POST', body: fd });
+          if (!resp.ok) {
+            const text = await resp.text().catch(()=> '');
+            let hint = '';
+            if (resp.status === 401) hint = ' — invalid/missing key for provider';
+            else if (resp.status === 429) hint = ' — rate limit / quota';
+            else if (/model|not\s*found|unsupported/i.test(text)) hint = ' — model not allowed for your key';
+            throw new Error(`Server ${resp.status}${hint} ${text}`);
+          }
+          const blob = await resp.blob();
+          if (lastBlobUrl) URL.revokeObjectURL(lastBlobUrl);
+          lastBlobUrl = URL.createObjectURL(blob);
+          downloadLastBtn.disabled = false;
+
+          const meta = {
+            ts: Date.now(),
+            title: (guidanceEl.value || textEl.value.slice(0,80)).replace(/\n/g,' '),
+            slides: Number(numSlidesEl.value),
+            provider: providerEl.value,
+            model: modelEl.value,
+            text: (textEl.value||'').slice(0,200),
+          };
+          addHistory(meta);
+          renderOutput(meta);
+
+          statusEl.textContent = 'Ready — click Download last';
+          toast('Presentation generated', 'success');
+        } catch (err) {
+          console.error(err);
+          statusEl.textContent = 'Error: ' + (err.message || 'Unknown');
+          toast('Generate failed: ' + (err.message || 'Unknown'), 'error');
+        } finally {
+          const elapsed = Math.round(performance.now() - start);
+          perfTimeEl.textContent = elapsed + 'ms';
+          setBusy(false);
+        }
+      }
+
+      function genLoadMeta(h) {
+        textEl.value = h.text || textEl.value;
+        guidanceEl.value = h.guidance || guidanceEl.value;
+        numSlidesEl.value = h.slides || numSlidesEl.value;
+        providerEl.value = h.provider || providerEl.value;
+        applyModels();
+        modelEl.value = h.model || modelEl.value;
+        validate();
+      }
+
+      /* --------------------------------- Events -------------------------------- */
+      // Provider -> models
+      providerEl.addEventListener('change', () => { applyModels(); validate(); });
+
+      // Paste API key
+      pasteKeyBtn.addEventListener('click', async () => {
+        try {
+          const text = await navigator.clipboard.readText();
+          apiKeyEl.value = (text || '').trim();
+          toast('API key pasted', 'success');
+          validate();
+        } catch (e) { toast('Clipboard access denied', 'error'); }
+      });
+
+      // Validation triggers
+      [textEl, apiKeyEl, numSlidesEl].forEach(el => el.addEventListener('input', validate));
+
+      // Clear form
+      clearBtn.addEventListener('click', () => {
+        textEl.value = ''; guidanceEl.value = ''; numSlidesEl.value = 10; templateEl.value = ''; reuseImagesEl.checked = false; statusEl.textContent = ''; validate();
+      });
+      clearFormBtn.addEventListener('click', () => { clearBtn.click(); });
+
+      // Floating/Sticky proxies
+      dockDl.addEventListener('click', () => downloadLastBtn.click());
+      dockClear.addEventListener('click', () => clearFormBtn.click());
+      dockSettings.addEventListener('click', () => settingsOpenBtn.click());
+      genMobile.addEventListener('click', () => { if (!generateBtn.disabled) generateBtn.click(); });
+      dlMobile.addEventListener('click', () => downloadLastBtn.click());
+      clrMobile.addEventListener('click', () => clearFormBtn.click());
+      setMobile.addEventListener('click', () => settingsOpenBtn.click());
+
+      // Download last
+      downloadLastBtn.addEventListener('click', () => {
+        if (!lastBlobUrl) { toast('No generated file available. Generate first.', 'error'); return; }
+        const a = document.createElement('a'); a.href = lastBlobUrl; a.download = 'generated.pptx'; a.click();
+      });
+
+      // Settings modal
+      settingsOpenBtn.addEventListener('click', () => settingsModal.style.display = 'grid');
+      closeSettingsBtn.addEventListener('click', () => settingsModal.style.display = 'none');
+      saveSettingsBtn.addEventListener('click', () => { saveState(); settingsModal.style.display = 'none'; toast('Settings saved', 'success'); });
+
+      // Providers modal
+      providerOpenBtn.addEventListener('click', () => providersModal.style.display = 'grid');
+      closeProvidersBtn.addEventListener('click', () => providersModal.style.display = 'none');
+
+      // Theme toggle: Dark -> Dusk -> Light
+      themeToggle.addEventListener('click', () => {
+        const cur = getTheme();
+        const idx = themeModes.indexOf(cur);
+        const next = themeModes[(idx+1) % themeModes.length];
+        setTheme(next);
+        const icon = themeToggle.querySelector('i');
+        if (icon) icon.className = next==='light' ? 'fas fa-sun' : next==='dusk' ? 'fas fa-cloud-moon' : 'fas fa-moon';
+        toast(`Theme: Velaris ${next}`, 'info');
+      });
+
+      // Keyboard: Ctrl/Cmd+G generate
+      window.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'g') {
+          e.preventDefault(); if (!generateBtn.disabled) generate();
+        }
+      });
+
+      // Wire generate button
+      generateBtn.addEventListener('click', generate);
+
+      // History actions
+      exportHistoryBtn.addEventListener('click', () => {
+        const arr = readHistory();
+        const blob = new Blob([JSON.stringify(arr, null, 2)], { type:'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = 'batai_deck_history.json'; a.click();
+        URL.revokeObjectURL(url);
+      });
+      clearHistoryBtn.addEventListener('click', () => { writeHistory([]); renderHistory(); toast('History cleared', 'success'); });
+
+      /* -------------------------------- Starfield ------------------------------- */
+      const starfield = (function(){
+        if (!starsCanvas || !starsCanvas.getContext) return null;
+        const ctx = starsCanvas.getContext('2d');
+        let stars = [];
+        let w=0,h=0, animationId=null, mode='dark';
+        let lastShoot = 0;
+
+        function rand(a,b){ return Math.random()*(b-a)+a; }
+
+        function resize(){
+          const dpr = Math.min(window.devicePixelRatio || 1, 2);
+          w = starsCanvas.clientWidth = window.innerWidth;
+          h = starsCanvas.clientHeight = window.innerHeight;
+          starsCanvas.width = Math.floor(w * dpr);
+          starsCanvas.height = Math.floor(h * dpr);
+          ctx.setTransform(dpr,0,0,dpr,0,0);
+          seed();
+        }
+
+        function densityFor(mode){
+          if (mode==='light') return 120;
+          if (mode==='dusk') return 180;
+          return 280;
+        }
+
+        function seed(){
+          const count = Math.floor(densityFor(mode) * (w*h) / (1280*720));
+          stars = new Array(count).fill(0).map(()=> ({
+            x: rand(0,w),
+            y: rand(0,h),
+            r: rand(0.4,1.6),
+            a: rand(0.4,1),
+            tw: rand(0.002,0.010) * (mode==='light'?0.7:1),
+            drift: rand(-0.02,0.02)
+          }));
+        }
+
+        function draw(t){
+          ctx.clearRect(0,0,w,h);
+          if (mode!=='light'){
+            const g = ctx.createRadialGradient(w*0.2, h*0.15, 0, w*0.2, h*0.15, Math.max(w,h)*0.8);
+            g.addColorStop(0, 'rgba(167,139,250,0.12)');
+            g.addColorStop(1, 'rgba(0,0,0,0)');
+            ctx.fillStyle = g;
+            ctx.fillRect(0,0,w,h);
+          }
+
+          ctx.save();
+          ctx.globalCompositeOperation = 'lighter';
+          for (const s of stars){
+            const twinkle = 0.6 + 0.4*Math.sin((t* s.tw) + s.x*0.05);
+            const alpha = s.a * twinkle * (mode==='light'?0.8:1);
+            ctx.globalAlpha = alpha;
+            ctx.fillStyle = mode==='light' ? '#7c5aed' : '#eaf2ff';
+            ctx.beginPath();
+            ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+            ctx.fill();
+            s.x += s.drift;
+            if (s.x < -2) s.x = w+2;
+            if (s.x > w+2) s.x = -2;
+          }
+          ctx.restore();
+
+          const now = performance.now();
+          const gap = mode==='light' ? 14000 : 8000;
+          if (!prefersReducedMotion.matches && now - lastShoot > gap + rand(-3000,3000)){
+            lastShoot = now;
+            shoot();
+          }
+        }
+
+        function shoot(){
+          const sx = rand(w*0.3,w*0.9);
+          const sy = rand(0,h*0.4);
+          const len = rand(120,220) * (mode==='light'?0.7:1);
+          const dur = rand(450,750);
+          const start = performance.now();
+          (function streak(){
+            const t = performance.now() - start;
+            const p = Math.min(1, t/dur);
+            ctx.save();
+            ctx.globalCompositeOperation = 'lighter';
+            const grad = ctx.createLinearGradient(sx,sy, sx-len, sy+len*0.3);
+            grad.addColorStop(0, mode==='light' ? 'rgba(124,90,237,0.9)' : 'rgba(255,255,255,0.9)');
+            grad.addColorStop(1, 'rgba(0,0,0,0)');
+            ctx.strokeStyle = grad;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(sx - p*len, sy + p*len*0.3);
+            ctx.lineTo(sx, sy);
+            ctx.stroke();
+            ctx.restore();
+            if (p<1) requestAnimationFrame(streak);
+          })();
+        }
+
+        function loop(t){ draw(t||0); animationId = requestAnimationFrame(loop); }
+        function start(){ if (prefersReducedMotion.matches) return; if (animationId) cancelAnimationFrame(animationId); animationId = requestAnimationFrame(loop); }
+        function stop(){ if (animationId) cancelAnimationFrame(animationId); animationId=null; }
+
+        window.addEventListener('resize', resize);
+        prefersReducedMotion.addEventListener?.('change', ()=> { if (prefersReducedMotion.matches) stop(); else start(); });
+
+        resize(); start();
+
+        return { setMode(m){ mode = m; seed(); }, destroy(){ stop(); window.removeEventListener('resize', resize); } };
+      })();
+
+      /* ---------------------------------- Init --------------------------------- */
+      setTheme('dark');
+      (function init() {
+        loadState();
+        applyModels();
+        renderHistory();
+        validate();
+      })();
+    })();
+  </script>
+</body>
+</html>
